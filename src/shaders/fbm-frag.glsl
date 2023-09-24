@@ -20,12 +20,41 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in vec4 fs_Pos;
+in float dist_Val;
 
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
 float noise3D(vec3 v) {
     return fract(sin(dot(v, vec3(78, 13, 37))) * 43758.5453);
+}
+
+vec3 random3(vec3 p) {
+    return fract(sin(vec3(dot(p, vec3(127.1, 311.7, 212.3)),
+                            dot(p, vec3(269.5, 183.3, 332.9)), 
+                            dot(p, vec3(305.2, 213.8, 119.4))))
+                 * 43758.5453);
+}
+
+float WorleyNoise(vec3 v) {
+    float i = (10.f * sin(0.02f)); // Now the space is 10x10 instead of 1x1. Change this to any number you want.
+    v = v * i;
+    vec3 vInt = floor(v);
+    vec3 vFract = fract(v);
+    float minDist = 1.0; // Minimum distance initialized to max.
+    
+    for (int z = -1; z <= 1; ++z) {
+        for(int y = -1; y <= 1; ++y) {
+            for(int x = -1; x <= 1; ++x) {
+                vec3 neighbor = vec3(float(x), float(y), float(z)); // Direction in which neighbor cell lies
+                vec3 point = random3(vInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
+                vec3 diff = neighbor + point - vFract; // Distance between fragment coord and neighbor’s Voronoi point
+                float dist = length(diff);
+                minDist = min(minDist, dist);
+            }
+        }
+    } 
+    return minDist;
 }
 
 float mySmoothStep(float a, float b, float t) {
@@ -66,7 +95,7 @@ float fbm(vec3 v) {
     int octaves = 8;
     float freq = 2.f;
     float amp = 0.5;
-    for (int i = 1; i <= octaves; i++) {
+    for (int i = 0; i < octaves; i++) {
         total += amp * interpNoise3D(v.xyz * freq);
         freq *= 2.f;
         amp *= persistence;
@@ -79,22 +108,21 @@ float fbm(vec3 v) {
 void main()
 { 
     // Material base color (before shading)
-    vec3 c1 = u_Color.xyz;
-    vec3 c2 = vec3(0.f, 0.f, 0.f);
+    vec3 c1 = vec3(1.f, 0.45f, 0.f);
+    //vec3 c1 = u_Color.xyz;
+    vec3 c2 = vec3(1.f, 0.9f, 0.7f);
+    
     float t = fbm(fs_Pos.xyz);
-
-    vec3 col = mix(c1, c2, t);
+    vec3 col = mix(c1, c2, dist_Val);
     vec4 diffuseColor = vec4(col.x, col.y, col.z, u_Color.w);
-
 
     // Calculate the diffuse term for Lambert shading
     float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
     // Avoid negative lighting values
     diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
+    
+    float ambientTerm = 0.2;    
 
-    float ambientTerm = 0.2;
-
-    float lt = dot(fs_LightVec, fs_Nor);
 
     float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
                                                         //to simulate ambient lighting. This ensures that faces that are not

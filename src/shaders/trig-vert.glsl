@@ -31,6 +31,7 @@ out vec4 fs_Nor;            // The array of normals that has been transformed by
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Pos;
+out float dist_Val;
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
@@ -99,32 +100,32 @@ void main()
                                                             // model matrix. This is necessary to ensure the normals remain
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
-
+    
 
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    float t = 0.001 * sin(float(u_Time) * 0.02) + 1.f;
+    float t = 0.5f * sin(float(u_Time) * 0.02) + 1.f;
 
-    float p1a = 0.2 * sin(vs_Pos.y * float(u_Time) / 6.f + 0.03);
-    float p1b = 0.2 * cos(vs_Pos.x * float(u_Time) / 9.f + 0.02);
-    float p1c = 0.2 * sin(vs_Pos.z * float(u_Time) / 8.f + 0.04);
+    float p1a = 0.15 * sin(vs_Pos.x * float(u_Time) / 6.f + 0.014);
+    float p1b = 0.15 * cos(vs_Pos.y * float(u_Time) / 9.f + 0.02);
+    float p1c = 0.15 * sin(vs_Pos.z * float(u_Time) / 8.f + 0.016);
     float p1 = (p1a + p1b + p1c) / 3.f;
 
-    float p2a = 0.2 * sin(vs_Pos.z * float(u_Time) / 5.f + 0.05);
-    float p2b = 0.2 * cos(vs_Pos.y * float(u_Time) / 7.f + 0.07);
-    float p2c = 0.2 * sin(vs_Pos.x * float(u_Time) / 10.f + 0.1);
+    float p2a = 0.15 * sin(vs_Pos.x * float(u_Time) / 6.f + 0.014);
+    float p2b = 0.15 * cos(vs_Pos.y * float(u_Time) / 9.f + 0.02);
+    float p2c = 0.15 * sin(vs_Pos.z * float(u_Time) / 8.f + 0.016);
     float p2 = (p2a + p2b + p2c) / 3.f;
     
-    float d = 0.3 * fbm(vs_Pos.xyz);
+    float d = 0.3 * fbm(vs_Pos.xyz * sin(float(u_Time) / 750.f));
     float R = 1.f;
-    vec3 startPos = normalize(modelposition.xyz) * (R - (d * p1));
-    vec3 endPos = normalize(modelposition.xyz) * (R + (d * p2));
-
-    
+    vec3 startPos = normalize(modelposition.xyz) * (R + d + (d * p1));
+    vec3 endPos = normalize(modelposition.xyz) * (R + d + (d * p2));
 
     vec3 fPos = (vec3(startPos) * (1.f - (t / 2.f))) + (vec3(endPos) * t) / 2.f;
     fs_Pos = vec4(fPos.x, fPos.y, fPos.z, vs_Pos.w);
-    //fs_Pos = vs_Pos;
+
+    float d1 = abs(length(fPos) - 0.85);
+    dist_Val = (d1 / 0.6);
     
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
 
