@@ -35,6 +35,61 @@ out vec4 fs_Pos;
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
 
+float noise3D(vec3 v) {
+    return fract(sin(dot(v, vec3(78, 13, 37))) * 43758.5453);
+}
+
+float mySmoothStep(float a, float b, float t) {
+    //t = smoothstep(0, 1, t);
+    //return mix(a, b, t);
+    return 1.f;
+}
+
+float interpNoise3D(vec3 p) {
+    float intX = (floor(p.x));
+    float fractX = fract(p.x);
+    float intY = (floor(p.y));
+    float fractY = fract(p.y);
+    float intZ = (floor(p.z));
+    float fractZ = fract(p.z);
+    
+    float a = noise3D(vec3(intX, intY, intZ));
+    float b = noise3D(vec3(intX + 1.f, intY, intZ));
+    float c = noise3D(vec3(intX, intY + 1.f, intZ));
+    float d = noise3D(vec3(intX, intY, intZ + 1.f));
+    float e = noise3D(vec3(intX + 1.f, intY + 1.f, intZ));
+    float f = noise3D(vec3(intX + 1.f, intY, intZ + 1.f));
+    float g = noise3D(vec3(intX, intY, intZ + 1.f));
+    float h = noise3D(vec3(intX + 1.f, intY + 1.f, intZ + 1.f));    
+   
+    float i1 = mix(a, b, fractX);
+    float i2 = mix(c, d, fractX);
+    float i3 = mix(e, f, fractX);
+    float i4 = mix(g, h, fractX);
+    float j1 = mix(i1, i2, fractY);
+    float j2 = mix(i3, i4, fractY);
+    return mix(j1, j2, fractZ);
+}
+
+float fbm(vec3 v) {
+    float total = 0.f;
+    float persistence = 0.5;
+    int octaves = 8;
+    float freq = 2.f;
+    float amp = 0.5;
+    for (int i = 1; i <= octaves; i++) {
+        total += amp * interpNoise3D(v.xyz * freq);
+        freq *= 2.f;
+        amp *= persistence;
+    }
+
+    return total;
+}
+
+float triangle_wave(float x, float freq, float amplitude) {
+    return abs(mod((x * freq), amplitude) - (0.5 * amplitude));
+}
+
 void main()
 {
     
@@ -48,17 +103,29 @@ void main()
 
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    float t1 = sin(0.02 * float(u_Time) + 1.f);
-    float t2 = cos(0.03 * float(u_Time));
-    float t3 = sin(0.01 * float(u_Time) + 0.2);
+    float t = 0.001 * sin(float(u_Time) * 0.02) + 1.f;
 
-    fs_Pos = vs_Pos;
-    fs_Pos.x += t1;
-    fs_Pos.x *= (t2 + 1.2);
-    fs_Pos.y += t2;
-    fs_Pos.y *= (t3 + 1.1);
-    fs_Pos.z += t3;
-    fs_Pos.z *= (t1 + 1.3);
+    float p1a = 0.2 * sin(vs_Pos.y * float(u_Time) / 6.f + 0.03);
+    float p1b = 0.2 * cos(vs_Pos.x * float(u_Time) / 9.f + 0.02);
+    float p1c = 0.2 * sin(vs_Pos.z * float(u_Time) / 8.f + 0.04);
+    float p1 = (p1a + p1b + p1c) / 3.f;
+
+    float p2a = 0.2 * sin(vs_Pos.z * float(u_Time) / 5.f + 0.05);
+    float p2b = 0.2 * cos(vs_Pos.y * float(u_Time) / 7.f + 0.07);
+    float p2c = 0.2 * sin(vs_Pos.x * float(u_Time) / 10.f + 0.1);
+    float p2 = (p2a + p2b + p2c) / 3.f;
+    
+    float d = 0.3 * fbm(vs_Pos.xyz);
+    float R = 1.f;
+    vec3 startPos = normalize(modelposition.xyz) * (R - (d * p1));
+    vec3 endPos = normalize(modelposition.xyz) * (R + (d * p2));
+
+    
+
+    vec3 fPos = (vec3(startPos) * (1.f - (t / 2.f))) + (vec3(endPos) * t) / 2.f;
+    fs_Pos = vec4(fPos.x, fPos.y, fPos.z, vs_Pos.w);
+    //fs_Pos = vs_Pos;
+    
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
