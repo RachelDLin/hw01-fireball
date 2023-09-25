@@ -21,8 +21,8 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
 
 uniform int u_Time;
 
-//uniform float u_noiseAmp;
-//uniform float u_noisePeriod;
+uniform float u_noiseAmp;
+uniform int u_noisePeriod;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -109,8 +109,8 @@ void main()
 
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    float amp = 0.15;
-    float period = 750.f;
+    float amp = u_noiseAmp;
+    float period = float(u_noisePeriod);
     float t = 0.5f * sin(float(u_Time) * 0.01) + 1.f;
 
     float p1a = amp * sin(vs_Pos.x * float(u_Time) / 7.f + 0.014);

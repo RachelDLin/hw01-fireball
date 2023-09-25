@@ -24,8 +24,6 @@ let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
 let prevTesselations: number = 4;
-let prevAmplitude: number = 0.15;
-let prevPeriod: number = 750;
 let time: GLint = 0;
 
 function loadScene() {
@@ -105,14 +103,9 @@ function main() {
       icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
       icosphere.create();
     }
-    if (controls.amplitude != prevAmplitude) {
-      prevAmplitude = controls.amplitude;
-      lambert.setAmp(controls.amplitude);
-    }
-    if (controls.period != prevPeriod) {
-      prevPeriod = controls.period;
-      lambert.setPeriod(controls.period);
-    }
+
+    lambert.setAmp(controls.amplitude);
+    lambert.setPeriod(controls.period);
 
     // renderer.render(camera, lambert, [
     //   icosphere,
