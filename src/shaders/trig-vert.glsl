@@ -23,14 +23,13 @@ uniform int u_Time;
 
 uniform float u_noiseAmp;
 uniform int u_noisePeriod;
+uniform float u_flameHeight;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
 in vec4 vs_Nor;             // The array of vertex normals passed to the shader
 
 in vec4 vs_Col;             // The array of vertex colors passed to the shader.
-
-
 
 out vec4 fs_Nor;            // The array of normals that has been transformed by u_ModelInvTr. This is implicitly passed to the fragment shader.
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
@@ -113,6 +112,20 @@ void main()
     float period = float(u_noisePeriod);
     float t = 0.5f * sin(float(u_Time) * 0.01) + 1.f;
 
+    fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+
+    fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
+
+    float dir = dot(normalize(vs_Pos.xyz), normalize(fs_LightVec.xyz)); // 1 = parallel, 0 = perp
+
+    fs_Pos = vs_Pos;
+
+    float height = u_flameHeight;
+    if (dir > 0.f) {
+        fs_Pos = mix(fs_Pos, vec4(height), dir);
+    }
+    
+
     float p1a = amp * sin(vs_Pos.x * float(u_Time) / 7.f + 0.014);
     float p1b = amp * cos(vs_Pos.y * float(u_Time) / 5.f + 0.02);
     float p1c = amp * sin(vs_Pos.z * float(u_Time) / 6.f + 0.013);
@@ -123,20 +136,22 @@ void main()
     float p2c = amp * sin(vs_Pos.z * float(u_Time) / 8.f + 0.016);
     float p2 = (p2a + p2b + p2c) / 3.f;
     
-    float d = 0.3 * fbm(vs_Pos.xyz * sin(float(u_Time) / period));
+    float d1 = 0.3 * fbm(vs_Pos.xyz * sin(float(u_Time) / period + vec3(0.4, 0.3, 0.1)));
+    float d2 = 0.2 * fbm(vs_Pos.xyz * sin(float(u_Time) / period + vec3(0.2, 0.5, 0.7)));
     float R = 1.f;
-    vec3 startPos = normalize(modelposition.xyz) * (R + 2.f * (d + (d * p1)));
-    vec3 endPos = normalize(modelposition.xyz) * (R + 2.f * (d + (d * p2)));
+    vec3 startPos = normalize(modelposition.xyz) * ((2.f * p1 * d1));
+    vec3 endPos = normalize(modelposition.xyz) * ((2.f * p2 * d2));
 
     vec3 fPos = (vec3(startPos) * (1.f - (t / 2.f))) + (vec3(endPos) * t) / 2.f;
-    fs_Pos = vec4(fPos.x, fPos.y, fPos.z, vs_Pos.w);
-
-    float d1 = abs(length(fPos) - (4.f * (d + (d * amp))));
-    dist_Val = (d1 / 0.6);
     
-    fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+    fs_Pos += vec4(fPos, vs_Pos.w);
 
-    fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
+    float d3 = abs(length(fs_Pos));
+    float d4 = height + (2.f * (0.4 + (0.4 * amp))) + (2.f * (0.3 + (0.3 * amp)));
+    dist_Val = (d3 / d4);
+    
+    
+    
 
     gl_Position = u_ViewProj * fs_Pos;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices

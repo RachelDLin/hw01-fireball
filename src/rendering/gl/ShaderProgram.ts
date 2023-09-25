@@ -32,6 +32,7 @@ class ShaderProgram {
   unifTime: WebGLUniformLocation;
   unifAmp: WebGLUniformLocation;
   unifPeriod: WebGLUniformLocation;
+  unifHeight: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -54,6 +55,7 @@ class ShaderProgram {
     this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
     this.unifAmp       = gl.getUniformLocation(this.prog, "u_noiseAmp");
     this.unifPeriod       = gl.getUniformLocation(this.prog, "u_noisePeriod");
+    this.unifHeight       = gl.getUniformLocation(this.prog, "u_flameHeight");
   }
 
   use() {
@@ -109,6 +111,13 @@ class ShaderProgram {
     this.use();
     if (this.unifPeriod != -1) {
       gl.uniform1i(this.unifPeriod, period);
+    }
+  }
+
+  setHeight(height: GLfloat) {
+    this.use();
+    if (this.unifHeight != -1) {
+      gl.uniform1f(this.unifHeight, height);
     }
   }
 

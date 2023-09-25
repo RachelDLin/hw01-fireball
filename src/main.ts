@@ -13,8 +13,9 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   tesselations: 4,
-  amplitude: 0.15,
+  amplitude: 0.45,
   period: 750,
+  height: 1.5,
   'Load Scene': loadScene, // A function pointer, essentially
   'Reset Scene' : resetScene,
   color: [255,115,0,255]
@@ -37,8 +38,9 @@ function loadScene() {
 
 function resetScene() {
   controls.tesselations = 4;
-  controls.amplitude = 0.15;
+  controls.amplitude = 0.45;
   controls.period = 750;
+  controls.height = 1.5,
   controls.color = [255,115,0,255];
 }
 
@@ -54,8 +56,9 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
-  gui.add(controls, 'amplitude', 0.0, 1.0).step(0.05);
+  gui.add(controls, 'amplitude', 0.0, 1.0).step(0.01);
   gui.add(controls, 'period', 0, 1000).step(50);
+  gui.add(controls, 'height', 0.0, 3.0).step(0.1);
   gui.add(controls, 'Load Scene');
   gui.add(controls, 'Reset Scene');
   gui.addColor(controls, 'color');
@@ -88,6 +91,11 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/fbm-frag.glsl')),
   ]);
 
+  const flat = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/flat-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/flat-frag.glsl')),
+  ]);
+
   // This function will be called every frame
   function tick() {
     camera.update();
@@ -106,9 +114,11 @@ function main() {
 
     lambert.setAmp(controls.amplitude);
     lambert.setPeriod(controls.period);
+    lambert.setHeight(controls.height);
 
     // renderer.render(camera, lambert, [
     //   icosphere,
+    renderer.render(camera, flat, [square], vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, controls.color[3] / 255));
     renderer.render(camera, lambert, [
       icosphere],
       vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, controls.color[3] / 255)

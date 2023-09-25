@@ -109,7 +109,7 @@ void main()
 { 
     // Material base color (before shading)
     vec3 c1 = u_Color.xyz;
-    vec3 c2 = mix(u_Color.xyz * 2.f, vec3(1.f, 1.f, 1.f), 0.65f);
+    vec3 c2 = mix(u_Color.xyz * 2.f, vec3(1.f, 1.f, 1.f), 0.7f);
     
     float t = fbm(fs_Pos.xyz);
     vec3 col = mix(c1, c2, dist_Val);
