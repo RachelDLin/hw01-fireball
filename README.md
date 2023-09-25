@@ -77,3 +77,5 @@ The fireball's shape a sphere that is deformed in the vertex shader by a combina
 The background is created by inputing the values of fbm into fbm several times. The final output was used to interpolate between a given color and black.
 
 Interactive variables include amplitude (the amplitude of the noise on the surface of the fireball), period (the period of the sin(u_Time) function that is input into the fbm noise), and height (the height of the flame on the fireball).
+
+link: https://racheldlin.github.io/hw01-fireball/
