@@ -12,15 +12,20 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
+  tesselations: 4,
+  amplitude: 0.15,
+  period: 750,
   'Load Scene': loadScene, // A function pointer, essentially
-  color: [255,0,0,255]
+  'Reset Scene' : resetScene,
+  color: [255,115,0,255]
 };
 
 let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
-let prevTesselations: number = 5;
+let prevTesselations: number = 4;
+let prevAmplitude: number = 0.15;
+let prevPeriod: number = 750;
 let time: GLint = 0;
 
 function loadScene() {
@@ -30,6 +35,13 @@ function loadScene() {
   square.create();
   cube = new Cube(vec3.fromValues(0, 0, 0));
   cube.create();
+}
+
+function resetScene() {
+  controls.tesselations = 4;
+  controls.amplitude = 0.15;
+  controls.period = 750;
+  controls.color = [255,115,0,255];
 }
 
 function main() {
@@ -44,7 +56,10 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
+  gui.add(controls, 'amplitude', 0.0, 1.0).step(0.05);
+  gui.add(controls, 'period', 0, 1000).step(50);
   gui.add(controls, 'Load Scene');
+  gui.add(controls, 'Reset Scene');
   gui.addColor(controls, 'color');
 
   // get canvas and webgl context
@@ -90,6 +105,15 @@ function main() {
       icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
       icosphere.create();
     }
+    if (controls.amplitude != prevAmplitude) {
+      prevAmplitude = controls.amplitude;
+      lambert.setAmp(controls.amplitude);
+    }
+    if (controls.period != prevPeriod) {
+      prevPeriod = controls.period;
+      lambert.setPeriod(controls.period);
+    }
+
     // renderer.render(camera, lambert, [
     //   icosphere,
     renderer.render(camera, lambert, [

@@ -30,6 +30,8 @@ class ShaderProgram {
   unifViewProj: WebGLUniformLocation;
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifAmp: WebGLUniformLocation;
+  unifPeriod: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -50,6 +52,8 @@ class ShaderProgram {
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
+    this.unifAmp       = gl.getUniformLocation(this.prog, "u_noiseAmp");
+    this.unifPeriod       = gl.getUniformLocation(this.prog, "u_noisePeriod");
   }
 
   use() {
@@ -91,6 +95,20 @@ class ShaderProgram {
     this.use();
     if(this.unifTime != -1) {
       gl.uniform1i(this.unifTime, time);
+    }
+  }
+
+  setAmp(amp: GLfloat) {
+    this.use();
+    if (this.unifAmp != -1) {
+      gl.uniform1f(this.unifAmp, amp);
+    }
+  }
+
+  setPeriod(period: GLint) {
+    this.use();
+    if (this.unifPeriod != -1) {
+      gl.uniform1i(this.unifPeriod, period);
     }
   }
 

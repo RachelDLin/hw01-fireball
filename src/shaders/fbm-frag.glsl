@@ -77,13 +77,13 @@ float interpNoise3D(vec3 p) {
     float d = noise3D(vec3(intX, intY, intZ + 1.f));
     float e = noise3D(vec3(intX + 1.f, intY + 1.f, intZ));
     float f = noise3D(vec3(intX + 1.f, intY, intZ + 1.f));
-    float g = noise3D(vec3(intX, intY, intZ + 1.f));
+    float g = noise3D(vec3(intX, intY + 1.f, intZ + 1.f));
     float h = noise3D(vec3(intX + 1.f, intY + 1.f, intZ + 1.f));    
    
-    float i1 = mix(a, b, fractX);
-    float i2 = mix(c, d, fractX);
-    float i3 = mix(e, f, fractX);
-    float i4 = mix(g, h, fractX);
+    float i1 = mix(a, h, fractX);
+    float i2 = mix(b, g, fractX);
+    float i3 = mix(c, f, fractX);
+    float i4 = mix(d, e, fractX);
     float j1 = mix(i1, i2, fractY);
     float j2 = mix(i3, i4, fractY);
     return mix(j1, j2, fractZ);
@@ -108,9 +108,8 @@ float fbm(vec3 v) {
 void main()
 { 
     // Material base color (before shading)
-    vec3 c1 = vec3(1.f, 0.45f, 0.f);
-    //vec3 c1 = u_Color.xyz;
-    vec3 c2 = vec3(1.f, 0.9f, 0.7f);
+    vec3 c1 = u_Color.xyz;
+    vec3 c2 = mix(u_Color.xyz * 2.f, vec3(1.f, 1.f, 1.f), 0.65f);
     
     float t = fbm(fs_Pos.xyz);
     vec3 col = mix(c1, c2, dist_Val);
