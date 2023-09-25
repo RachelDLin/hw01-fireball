@@ -71,3 +71,9 @@ Choose one of the following options:
 - Publish your project to gh-pages. `npm run deploy`. It should now be visible at http://username.github.io/repo-name
 - Create a [pull request](https://help.github.com/articles/creating-a-pull-request/) to this repository, and in the comment, include a link to your published project.
 - Submit the link to your pull request on Canvas.
+
+The fireball's shape a sphere that is deformed in the vertex shader by a combination of sinusoidal functions and 3D fbm noise (based on vertex position and time). 
+
+The background is created by inputing the values of fbm into fbm several times. The final output was used to interpolate between a given color and black.
+
+Interactive variables include amplitude (the amplitude of the noise on the surface of the fireball), period (the period of the sin(u_Time) function that is input into the fbm noise), and height (the height of the flame on the fireball).
