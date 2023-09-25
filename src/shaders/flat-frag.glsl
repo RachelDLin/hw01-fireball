@@ -76,10 +76,13 @@ void main() {
 
   color = mix(color,
               vec3(0.666667, 1.f, 1.f),
-              clamp(length(r),0.0,1.0));
+              clamp(length(r), 0.0, 1.0));
 
   out_Col = vec4((f * f * f + 0.6 * f * f + 0.5 * f) * color, 1.f);
   */
   float t = fbm(fs_Pos + vec2(fbm(fs_Pos + vec2(fbm(fs_Pos)))));
-  out_Col = mix(vec4(0.0, 0.0, 0.0, 1.0), u_Color / 1.5f, t * 2.f);
+
+  float tint = 3.f;
+  float brightness = 1.6f;
+  out_Col = mix(vec4(0.0, 0.0, 0.0, 1.0), u_Color / tint, (1.f - t) * brightness);
 }

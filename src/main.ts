@@ -118,11 +118,14 @@ function main() {
 
     // renderer.render(camera, lambert, [
     //   icosphere,
+    gl.disable(gl.DEPTH_TEST);
     renderer.render(camera, flat, [square], vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, controls.color[3] / 255));
+    gl.enable(gl.DEPTH_TEST);
     renderer.render(camera, lambert, [
       icosphere],
       vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, controls.color[3] / 255)
     );
+    
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

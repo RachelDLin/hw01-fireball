@@ -3,6 +3,8 @@ precision highp float;
 
 // The vertex shader used to render the background of the scene
 
+uniform vec4 u_Color;
+
 in vec4 vs_Pos;
 out vec2 fs_Pos;
 
